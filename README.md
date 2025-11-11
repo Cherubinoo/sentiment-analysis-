@@ -33,6 +33,8 @@ A Flask-based web application for collecting and analyzing student feedback on s
    - Open http://127.0.0.1:5000
    - Register as admin or student, then login.
 
+   now deployed in vercel
+
 ## Database Schema
 - Users, Regulations, Semesters, Subjects, Reviews
 

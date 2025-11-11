@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}My Reviews{% endblock %}
+
+{% block content %}
+<h2>My Reviews</h2>
+{% if reviews %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Regulation</th>
+            <th>Semester</th>
+            <th>Subject</th>
+            <th>Teaching</th>
+            <th>Course Content</th>
+            <th>Examination</th>
+            <th>Lab Support</th>
+            <th>Teaching Method</th>
+            <th>Library Support</th>
+            <th>Feedback</th>
+            <th>Comment</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for review in reviews %}
+        <tr>
+            <td>{{ review.regulation.code }}</td>
+            <td>{{ review.semester.name }}</td>
+            <td>{{ review.subject.course_name }} ({{ review.subject.course_code }})</td>
+            <td>{{ review.teaching }}</td>
+            <td>{{ review.course_content }}</td>
+            <td>{{ review.examination }}</td>
+            <td>{{ review.lab_support }}</td>
+            <td>{{ review.teaching_method }}</td>
+            <td>{{ review.library_support }}</td>
+            <td>{{ review.feedback }}</td>
+            <td>{{ review.comment or 'N/A' }}</td>
+            <td>{{ review.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No reviews submitted yet.</p>
+{% endif %}
+<a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endblock %}

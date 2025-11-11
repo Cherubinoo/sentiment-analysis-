@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<h2>Student Dashboard</h2>
+<p>Select your regulation to proceed.</p>
+<div class="row">
+    {% for regulation in regulations %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ regulation.title }}</h5>
+                <a href="{{ url_for('select_regulation', regulation_id=regulation.id) }}" class="btn btn-primary">Select</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<hr>
+<a href="{{ url_for('student_my_reviews') }}" class="btn btn-info">View My Reviews</a>
+{% endblock %}

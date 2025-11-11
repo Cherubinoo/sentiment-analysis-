@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Review Subjects - {{ current_sem.name }}{% endblock %}
+
+{% block content %}
+<h2>Review Subjects for {{ current_sem.name }}</h2>
+<p>Step {{ step + 1 }} of {{ total_steps }}</p>
+<div class="progress mb-3">
+    <div class="progress-bar" role="progressbar" style="width: {{ (step + 1) / total_steps * 100 }}%%" aria-valuenow="{{ step + 1 }}" aria-valuemin="1" aria-valuemax="{{ total_steps }}"></div>
+</div>
+<form method="POST">
+    {% for subject in subjects %}
+    <div class="card mb-2">
+        <div class="card-body p-3">
+            <h5>{{ subject.course_code }} - {{ subject.course_name }}</h5>
+            <p>Type: {{ subject.course_type }}, LTP: {{ subject.ltp }}, Credits: {{ subject.credits }}, Category: {{ subject.category }}</p>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Teaching</label>
+                    <textarea class="form-control" name="teaching_{{ subject.id }}" rows="3" placeholder="Feedback on teaching..." required></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Course Content</label>
+                    <textarea class="form-control" name="course_content_{{ subject.id }}" rows="3" placeholder="Feedback on course content..." required></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Examination</label>
+                    <textarea class="form-control" name="examination_{{ subject.id }}" rows="3" placeholder="Feedback on examination..." required></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Lab Support</label>
+                    <textarea class="form-control" name="lab_support_{{ subject.id }}" rows="3" placeholder="Feedback on lab support..." required></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Teaching Method</label>
+                    <textarea class="form-control" name="teaching_method_{{ subject.id }}" rows="3" placeholder="Feedback on teaching method..." required></textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Library Support</label>
+                    <textarea class="form-control" name="library_support_{{ subject.id }}" rows="3" placeholder="Feedback on library support..." required></textarea>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Additional Comment (Optional)</label>
+                <textarea class="form-control" name="comment_{{ subject.id }}" rows="2" placeholder="Any additional comments..."></textarea>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% if step < total_steps - 1 %}
+    <button type="submit" name="action" value="next" class="btn btn-primary">Next</button>
+    {% else %}
+    <button type="submit" name="action" value="submit" class="btn btn-success">Submit All Reviews</button>
+    {% endif %}
+</form>
+<a href="{{ url_for('select_regulation', regulation_id=regulation_id) }}" class="btn btn-secondary">Back</a>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Select Current Semester{% endblock %}
+
+{% block content %}
+<h2>Select Your Current Semester</h2>
+<form method="POST">
+    <div class="mb-3">
+        <label for="current_year" class="form-label">Current Year</label>
+        <select class="form-control" id="current_year" name="current_year" required onchange="updateSemesters()">
+            <option value="">Select Year</option>
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>
+            <option value="3">Year 3</option>
+            <option value="4">Year 4</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="current_sem" class="form-label">Current Semester</label>
+        <select class="form-control" id="current_sem" name="current_sem" required>
+            <option value="">Select Semester</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Proceed to Reviews</button>
+</form>
+<a href="{{ url_for('student_dashboard') }}" class="btn btn-secondary">Back</a>
+
+<script>
+function updateSemesters() {
+    const year = document.getElementById('current_year').value;
+    const semSelect = document.getElementById('current_sem');
+    semSelect.innerHTML = '<option value="">Select Semester</option>';
+    if (year == '1') {
+        semSelect.innerHTML += '<option value="1">Sem I</option><option value="2">Sem II</option>';
+    } else if (year == '2') {
+        semSelect.innerHTML += '<option value="1">Sem III</option><option value="2">Sem IV</option>';
+    } else if (year == '3') {
+        semSelect.innerHTML += '<option value="1">Sem V</option><option value="2">Sem VI</option>';
+    } else if (year == '4') {
+        semSelect.innerHTML += '<option value="1">Sem VII</option><option value="2">Sem VIII</option>';
+    }
+}
+</script>
+{% endblock %}

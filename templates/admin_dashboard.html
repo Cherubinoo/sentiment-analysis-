@@ -1,0 +1,759 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Ramco Institute{% endblock %}
+
+{% block content %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .stats-card h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stats-card p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    .chart-container {
+        position: relative;
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #666;
+        font-weight: 500;
+    }
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        border-bottom: 3px solid #667eea;
+        background: transparent;
+    }
+    .loading-spinner {
+        text-align: center;
+        padding: 40px;
+    }
+</style>
+
+<div class="py-4">
+    <div class="container-fluid">
+        <div class="text-center mb-4">
+            <h1 class="display-5">Staff Analytics Dashboard</h1>
+            <p class="lead text-muted">Comprehensive Student Sentiment Analysis & EDA</p>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="row mb-4" id="statsOverview">
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3 id="totalReviews">-</h3>
+                    <p><i class="fas fa-comments"></i> Total Reviews</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3 id="totalStudents">-</h3>
+                    <p><i class="fas fa-users"></i> Total Students</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3 id="totalSubjects">-</h3>
+                    <p><i class="fas fa-book"></i> Total Subjects</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <h3 id="overallSatisfaction">-</h3>
+                    <p><i class="fas fa-star"></i> Satisfaction Score</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="analyticsTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab">Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ratings-tab" data-bs-toggle="tab" href="#ratings" role="tab">Ratings Analysis</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="sentiment-tab" data-bs-toggle="tab" href="#sentiment" role="tab">Sentiment Analysis</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="trends-tab" data-bs-toggle="tab" href="#trends" role="tab">Trends</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="export-tab" data-bs-toggle="tab" href="#export" role="tab">Export Data</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="analyticsTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Sentiment Distribution</h5>
+                            <canvas id="sentimentPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Average Ratings by Category</h5>
+                            <canvas id="averageRatingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Top Subjects by Reviews</h5>
+                            <canvas id="subjectReviewsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ratings Analysis Tab -->
+            <div class="tab-pane fade" id="ratings" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Teaching Quality Distribution</h5>
+                            <canvas id="teachingDistChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Course Content Distribution</h5>
+                            <canvas id="courseContentDistChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Examination Quality Distribution</h5>
+                            <canvas id="examinationDistChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Lab Support Distribution</h5>
+                            <canvas id="labSupportDistChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentiment Analysis Tab -->
+            <div class="tab-pane fade" id="sentiment" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Overall Sentiment Distribution</h5>
+                            <canvas id="overallSentimentPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Common Themes</h5>
+                            <div id="themesContainer" style="max-height: 400px; overflow-y: auto;">
+                                <div class="loading-spinner">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Semester-wise Sentiment Analysis</h5>
+                            <canvas id="semesterSentimentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Regulation-wise Sentiment Analysis</h5>
+                            <canvas id="regulationSentimentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trends Tab -->
+            <div class="tab-pane fade" id="trends" role="tabpanel">
+                <div class="chart-container">
+                    <h5 class="chart-title">Sentiment Trends Over Time</h5>
+                    <canvas id="timeTrendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div class="tab-pane fade" id="export" role="tabpanel">
+                <div class="card border-0 shadow-sm p-4">
+                    <h3 class="mb-4">Export Review Data</h3>
+                    <form action="{{ url_for('admin_export_csv') }}" method="GET">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="regulation_id" class="form-label">Regulation</label>
+                                <select class="form-control" id="regulation_id" name="regulation_id">
+                                    <option value="">All Regulations</option>
+                                    {% for reg in regulations %}
+                                    <option value="{{ reg.id }}">{{ reg.code }} - {{ reg.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="semester_id" class="form-label">Semester</label>
+                                <select class="form-control" id="semester_id" name="semester_id">
+                                    <option value="">All Semesters</option>
+                                    {% for sem in semesters %}
+                                    <option value="{{ sem.id }}">{{ sem.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="student_id" class="form-label">Student</label>
+                                <select class="form-control" id="student_id" name="student_id">
+                                    <option value="">All Students</option>
+                                    {% for stud in students %}
+                                    <option value="{{ stud.id }}">{{ stud.full_name }} ({{ stud.reg_no }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-download me-2"></i>Download CSV
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Global chart instances
+let charts = {};
+
+// Color palettes
+const colors = {
+    primary: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
+    sentiment: {
+        happy: '#43e97b',
+        neutral: '#4facfe',
+        bad: '#f5576c'
+    }
+};
+
+// Load overview data
+async function loadOverview() {
+    try {
+        const response = await fetch('/api/analytics/overview');
+        const data = await response.json();
+        
+        // Update stats cards
+        document.getElementById('totalReviews').textContent = data.total_reviews || 0;
+        document.getElementById('totalStudents').textContent = data.total_students || 0;
+        document.getElementById('totalSubjects').textContent = data.total_subjects || 0;
+        document.getElementById('overallSatisfaction').textContent = data.overall_satisfaction ? data.overall_satisfaction.toFixed(1) : '0.0';
+        
+        // Create sentiment pie chart
+        createSentimentPieChart(data.sentiment_distribution);
+        
+        // Create average ratings bar chart
+        createAverageRatingsChart(data.average_ratings);
+    } catch (error) {
+        console.error('Error loading overview:', error);
+    }
+}
+
+// Create sentiment pie chart
+function createSentimentPieChart(sentimentData) {
+    const ctx = document.getElementById('sentimentPieChart');
+    if (charts.sentimentPie) charts.sentimentPie.destroy();
+    
+    charts.sentimentPie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Happy', 'Neutral', 'Bad'],
+            datasets: [{
+                data: [sentimentData.happy || 0, sentimentData.neutral || 0, sentimentData.bad || 0],
+                backgroundColor: [colors.sentiment.happy, colors.sentiment.neutral, colors.sentiment.bad],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: { size: 14 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Create average ratings bar chart
+function createAverageRatingsChart(ratingsData) {
+    const ctx = document.getElementById('averageRatingsChart');
+    if (charts.avgRatings) charts.avgRatings.destroy();
+    
+    const labels = ['Teaching', 'Course Content', 'Examination', 'Lab Support', 'Teaching Method', 'Library Support'];
+    const values = [
+        ratingsData.teaching || 0,
+        ratingsData.course_content || 0,
+        ratingsData.examination || 0,
+        ratingsData.lab_support || 0,
+        ratingsData.teaching_method || 0,
+        ratingsData.library_support || 0
+    ];
+    
+    charts.avgRatings = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Rating',
+                data: values,
+                backgroundColor: colors.primary,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Rating: ${context.parsed.y.toFixed(2)} / 5.0`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Load subject-wise data
+async function loadSubjectData() {
+    try {
+        const response = await fetch('/api/analytics/subject-wise');
+        const data = await response.json();
+        
+        const labels = data.map(s => s.subject_code);
+        const values = data.map(s => s.overall_score);
+        
+        const ctx = document.getElementById('subjectReviewsChart');
+        if (charts.subjectReviews) charts.subjectReviews.destroy();
+        
+        charts.subjectReviews = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Overall Score',
+                    data: values,
+                    backgroundColor: colors.primary,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 5
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const item = data[context.dataIndex];
+                                return [
+                                    `${item.subject_name}`,
+                                    `Score: ${context.parsed.x.toFixed(2)} / 5.0`,
+                                    `Reviews: ${item.review_count}`
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading subject data:', error);
+    }
+}
+
+// Load ratings distribution
+async function loadRatingsDistribution() {
+    try {
+        const response = await fetch('/api/analytics/ratings-distribution');
+        const data = await response.json();
+        
+        createDistributionChart('teachingDistChart', data.teaching, 'Teaching Quality');
+        createDistributionChart('courseContentDistChart', data.course_content, 'Course Content');
+        createDistributionChart('examinationDistChart', data.examination, 'Examination');
+        createDistributionChart('labSupportDistChart', data.lab_support, 'Lab Support');
+    } catch (error) {
+        console.error('Error loading ratings distribution:', error);
+    }
+}
+
+// Create distribution chart helper
+function createDistributionChart(canvasId, distData, title) {
+    const ctx = document.getElementById(canvasId);
+    if (charts[canvasId]) charts[canvasId].destroy();
+    
+    charts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+            datasets: [{
+                label: 'Count',
+                data: [distData[1] || 0, distData[2] || 0, distData[3] || 0, distData[4] || 0, distData[5] || 0],
+                backgroundColor: ['#f5576c', '#ff9a76', '#4facfe', '#43e97b', '#38f9d7'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// Load overall sentiment pie chart
+async function loadOverallSentiment() {
+    try {
+        const response = await fetch('/api/analytics/overall-sentiment');
+        const data = await response.json();
+        
+        const ctx = document.getElementById('overallSentimentPieChart');
+        if (charts.overallSentiment) charts.overallSentiment.destroy();
+        
+        charts.overallSentiment = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Happy', 'Neutral', 'Bad'],
+                datasets: [{
+                    data: [
+                        data.sentiment_distribution.happy || 0,
+                        data.sentiment_distribution.neutral || 0,
+                        data.sentiment_distribution.bad || 0
+                    ],
+                    backgroundColor: [colors.sentiment.happy, colors.sentiment.neutral, colors.sentiment.bad],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 14 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading overall sentiment:', error);
+    }
+}
+
+// Load semester sentiment data
+async function loadSemesterSentiment() {
+    try {
+        const response = await fetch('/api/analytics/semester-wise');
+        const data = await response.json();
+        
+        const labels = data.map(s => s.semester_name);
+        const happy = data.map(s => s.sentiment_distribution.happy || 0);
+        const neutral = data.map(s => s.sentiment_distribution.neutral || 0);
+        const bad = data.map(s => s.sentiment_distribution.bad || 0);
+        
+        const ctx = document.getElementById('semesterSentimentChart');
+        if (charts.semesterSentiment) charts.semesterSentiment.destroy();
+        
+        charts.semesterSentiment = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Happy',
+                        data: happy,
+                        backgroundColor: colors.sentiment.happy
+                    },
+                    {
+                        label: 'Neutral',
+                        data: neutral,
+                        backgroundColor: colors.sentiment.neutral
+                    },
+                    {
+                        label: 'Bad',
+                        data: bad,
+                        backgroundColor: colors.sentiment.bad
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading semester sentiment:', error);
+    }
+}
+
+// Load regulation-wise sentiment data
+async function loadRegulationSentiment() {
+    try {
+        const response = await fetch('/api/analytics/regulation-wise');
+        const data = await response.json();
+        
+        if (data.length === 0) {
+            console.log('No regulation data available');
+            return;
+        }
+        
+        const labels = data.map(r => r.regulation_code);
+        const happy = data.map(r => r.sentiment_distribution.happy || 0);
+        const neutral = data.map(r => r.sentiment_distribution.neutral || 0);
+        const bad = data.map(r => r.sentiment_distribution.bad || 0);
+        
+        const ctx = document.getElementById('regulationSentimentChart');
+        if (charts.regulationSentiment) charts.regulationSentiment.destroy();
+        
+        charts.regulationSentiment = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Happy',
+                        data: happy,
+                        backgroundColor: colors.sentiment.happy
+                    },
+                    {
+                        label: 'Neutral',
+                        data: neutral,
+                        backgroundColor: colors.sentiment.neutral
+                    },
+                    {
+                        label: 'Bad',
+                        data: bad,
+                        backgroundColor: colors.sentiment.bad
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading regulation sentiment:', error);
+    }
+}
+
+// Load common themes
+async function loadCommonThemes() {
+    try {
+        const response = await fetch('/api/analytics/common-themes');
+        const data = await response.json();
+        
+        const container = document.getElementById('themesContainer');
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center">No themes available</p>';
+            return;
+        }
+        
+        let html = '<div class="list-group">';
+        data.forEach((theme, index) => {
+            const percentage = ((theme.count / data[0].count) * 100).toFixed(0);
+            html += `
+                <div class="list-group-item border-0 mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><strong>${index + 1}. ${theme.word}</strong></span>
+                        <span class="badge bg-primary">${theme.count}</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading themes:', error);
+    }
+}
+
+// Load time trends
+async function loadTimeTrends() {
+    try {
+        const response = await fetch('/api/analytics/time-trends');
+        const data = await response.json();
+        
+        const labels = data.map(d => d.date);
+        const happy = data.map(d => d.counts.happy || 0);
+        const neutral = data.map(d => d.counts.neutral || 0);
+        const bad = data.map(d => d.counts.bad || 0);
+        
+        const ctx = document.getElementById('timeTrendsChart');
+        if (charts.timeTrends) charts.timeTrends.destroy();
+        
+        charts.timeTrends = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Happy',
+                        data: happy,
+                        borderColor: colors.sentiment.happy,
+                        backgroundColor: colors.sentiment.happy + '40',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Neutral',
+                        data: neutral,
+                        borderColor: colors.sentiment.neutral,
+                        backgroundColor: colors.sentiment.neutral + '40',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Bad',
+                        data: bad,
+                        borderColor: colors.sentiment.bad,
+                        backgroundColor: colors.sentiment.bad + '40',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading time trends:', error);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadOverview();
+    loadSubjectData();
+    
+    // Load data when tabs are activated
+    document.getElementById('ratings-tab').addEventListener('shown.bs.tab', function() {
+        loadRatingsDistribution();
+    });
+    
+    document.getElementById('sentiment-tab').addEventListener('shown.bs.tab', function() {
+        loadOverallSentiment();
+        loadSemesterSentiment();
+        loadRegulationSentiment();
+        loadCommonThemes();
+    });
+    
+    document.getElementById('trends-tab').addEventListener('shown.bs.tab', function() {
+        loadTimeTrends();
+    });
+});
+</script>
+{% endblock %}
