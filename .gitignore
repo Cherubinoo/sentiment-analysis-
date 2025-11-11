@@ -45,3 +45,14 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+
+# Vercel
+.vercel
+
+# Test/Debug files
+test_*.py
+check_*.py
+debug_*.py
+*_migrate.py
+fix_*.py
+reset_*.py

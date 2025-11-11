@@ -1,73 +1,65 @@
 # Student Sentiment Analysis System
 
-Flask-based web application for collecting and analyzing student feedback on courses.
+Flask web app for collecting and analyzing student feedback on courses.
 
-## 🚀 Quick Deploy
+## 🚀 Deploy to Vercel
 
-**Your app is crashing?** → Read `FIX_RENDER_DEPLOYMENT.md`
+### 1. Setup Database (Required)
+Get a free MySQL database from [Railway](https://railway.app):
+- New Project → Provision MySQL
+- Copy connection string
+- Format: `mysql+pymysql://user:pass@host:port/railway`
 
-**First time deploying?** → Read `QUICKSTART.md` (5 minutes)
+### 2. Deploy
+1. Go to [vercel.com](https://vercel.com)
+2. Import this GitHub repo
+3. Add environment variables:
+   - `SECRET_KEY` = any random string
+   - `DATABASE_URI` = your Railway MySQL URL
+   - `FLASK_ENV` = production
+   - `FLASK_DEBUG` = False
+4. Deploy!
 
-**Need detailed guide?** → Read `DEPLOYMENT.md`
+### 3. Initialize Database
+```bash
+# Set your production database URL
+set DATABASE_URI=your-railway-database-url
 
-## 📋 Features
+# Create tables
+python init_db.py
+```
 
-- Student feedback collection system
-- Multi-semester course reviews
-- Admin dashboard with analytics
-- Sentiment analysis on feedback
-- CSV export functionality
-- Role-based access (Student/Admin)
+Done! Your app is live at `https://your-app.vercel.app`
 
-## 🛠️ Local Development
+## 📁 Project Structure
+
+```
+├── api/
+│   └── index.py          # Vercel entry point
+├── templates/            # HTML templates
+├── app.py               # Main Flask app
+├── preprocessing.py     # Sentiment analysis
+├── init_db.py          # Database setup
+├── create_admin.py     # Create admin user
+├── create_new_staff.py # Create staff user
+├── vercel.json         # Vercel config
+└── requirements.txt    # Dependencies
+```
+
+## 🔧 Local Development
 
 ```bash
-# Install dependencies
 pip install -r requirements.txt
-
-# Setup environment
 cp .env.example .env
-# Edit .env with your database credentials
-
-# Initialize database
+# Edit .env with your database
 python init_db.py
-
-# Run app
 python app.py
 ```
 
 Visit http://localhost:5000
 
-## 🔧 Database Setup
-
-### Check Connection
-```bash
-python check_db.py
-```
-
-### Initialize Tables
-```bash
-python init_db.py
-```
-
-## 📦 Tech Stack
-
-- **Backend**: Flask, SQLAlchemy
-- **Database**: MySQL or PostgreSQL
-- **Auth**: Flask-Login
-- **Sentiment**: TextBlob
-- **Deployment**: Gunicorn
-
-## 🌐 Deployment Platforms
-
-- ✅ Render (Recommended)
-- ✅ Railway
-- ✅ Heroku
-- ✅ PythonAnywhere
-
 ## 📝 Environment Variables
 
-Required:
 - `SECRET_KEY` - Flask secret key
 - `DATABASE_URI` - Database connection string
 - `FLASK_ENV` - development/production
@@ -75,18 +67,4 @@ Required:
 
 ## 🐛 Troubleshooting
 
-**App crashes on startup?**
-- Check `FIX_RENDER_DEPLOYMENT.md`
-- Run `python check_db.py` to verify database
-
-**Database connection error?**
-- Verify `DATABASE_URI` format
-- Check database is running
-- Run `python check_db.py`
-
-**Tables don't exist?**
-- Run `python init_db.py`
-
-## 📄 License
-
-MIT License - feel free to use for your projects!
+Check `VERCEL_QUICKSTART.md` for detailed help.
