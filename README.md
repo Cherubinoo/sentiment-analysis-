@@ -2,34 +2,21 @@
 
 Flask web app for collecting and analyzing student feedback on courses.
 
-## 🚀 Deploy to Vercel
+## 🚀 Quick Deploy with Custom Domain
 
-### 1. Setup Database (Required)
-Get a free MySQL database from [Railway](https://railway.app):
-- New Project → Provision MySQL
-- Copy connection string
-- Format: `mysql+pymysql://user:pass@host:port/railway`
+**Your domain:** sentimentanalysis.lovestoblog.com
 
-### 2. Deploy
-1. Go to [vercel.com](https://vercel.com)
-2. Import this GitHub repo
-3. Add environment variables:
-   - `SECRET_KEY` = any random string
-   - `DATABASE_URI` = your Railway MySQL URL
-   - `FLASK_ENV` = production
-   - `FLASK_DEBUG` = False
-4. Deploy!
+### Deploy to Render (Recommended)
+1. Go to [render.com](https://render.com) → Sign up with GitHub
+2. "New +" → "Web Service" → Select this repo
+3. Click "Create Web Service" (auto-detects settings)
+4. Add custom domain: `sentimentanalysis.lovestoblog.com`
+5. Update DNS with CNAME record Render provides
+6. Run `python init_db.py` in Shell tab
 
-### 3. Initialize Database
-```bash
-# Set your production database URL
-set DATABASE_URI=your-railway-database-url
+**Done!** Live at https://sentimentanalysis.lovestoblog.com
 
-# Create tables
-python init_db.py
-```
-
-Done! Your app is live at `https://your-app.vercel.app`
+📖 **Detailed guide:** See `CUSTOM_DOMAIN_SETUP.md`
 
 ## 📁 Project Structure
 
