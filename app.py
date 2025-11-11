@@ -707,6 +707,11 @@ def api_overall_sentiment():
     })
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(host='0.0.0.0', debug=True)
+    # Only create tables when running locally, not on production startup
+    # On production, use a separate migration script or manual setup
+    if os.getenv('FLASK_ENV') == 'development':
+        with app.app_context():
+            db.create_all()
+    # Use environment variable for debug mode (False in production)
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', debug=debug_mode)

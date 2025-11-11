@@ -1,43 +1,92 @@
-# Student Sentiment Analysis
+# Student Sentiment Analysis System
 
-A Flask-based web application for collecting and analyzing student feedback on subjects across different regulations and semesters.
+Flask-based web application for collecting and analyzing student feedback on courses.
 
-## Features
-- User registration and login (Admin and Student roles)
-- Students can select regulation, semester, and submit reviews for subjects
-- Sentiment analysis using TextBlob
-- Admin dashboard with sentiment analytics
+## 🚀 Quick Deploy
 
-## Setup
+**Your app is crashing?** → Read `FIX_RENDER_DEPLOYMENT.md`
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+**First time deploying?** → Read `QUICKSTART.md` (5 minutes)
 
-2. **Database Setup:**
-   - Create a MySQL database named `sentiment_db` in phpMyAdmin.
-   - Update `.env` with your database credentials if needed.
+**Need detailed guide?** → Read `DEPLOYMENT.md`
 
-3. **Seed the database:**
-   ```bash
-   python seed.py
-   ```
+## 📋 Features
 
-4. **Run the application:**
-   ```bash
-   python app.py
-   ```
+- Student feedback collection system
+- Multi-semester course reviews
+- Admin dashboard with analytics
+- Sentiment analysis on feedback
+- CSV export functionality
+- Role-based access (Student/Admin)
 
-5. **Access:**
-   - Open http://127.0.0.1:5000
-   - Register as admin or student, then login.
+## 🛠️ Local Development
 
-   now deployed in vercel
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-## Database Schema
-- Users, Regulations, Semesters, Subjects, Reviews
+# Setup environment
+cp .env.example .env
+# Edit .env with your database credentials
 
-## Usage
-- Students: Register, select regulation/semester, submit ratings and comments.
-- Admins: View aggregated sentiment data by regulation/semester.
+# Initialize database
+python init_db.py
+
+# Run app
+python app.py
+```
+
+Visit http://localhost:5000
+
+## 🔧 Database Setup
+
+### Check Connection
+```bash
+python check_db.py
+```
+
+### Initialize Tables
+```bash
+python init_db.py
+```
+
+## 📦 Tech Stack
+
+- **Backend**: Flask, SQLAlchemy
+- **Database**: MySQL or PostgreSQL
+- **Auth**: Flask-Login
+- **Sentiment**: TextBlob
+- **Deployment**: Gunicorn
+
+## 🌐 Deployment Platforms
+
+- ✅ Render (Recommended)
+- ✅ Railway
+- ✅ Heroku
+- ✅ PythonAnywhere
+
+## 📝 Environment Variables
+
+Required:
+- `SECRET_KEY` - Flask secret key
+- `DATABASE_URI` - Database connection string
+- `FLASK_ENV` - development/production
+- `FLASK_DEBUG` - True/False
+
+## 🐛 Troubleshooting
+
+**App crashes on startup?**
+- Check `FIX_RENDER_DEPLOYMENT.md`
+- Run `python check_db.py` to verify database
+
+**Database connection error?**
+- Verify `DATABASE_URI` format
+- Check database is running
+- Run `python check_db.py`
+
+**Tables don't exist?**
+- Run `python init_db.py`
+
+## 📄 License
+
+MIT License - feel free to use for your projects!
