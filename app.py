@@ -35,6 +35,14 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'mysql+pymysql://root:@localhost/sentiment_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Vercel serverless optimizations
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+    'pool_size': 5,
+    'max_overflow': 10
+}
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
