@@ -65,18 +65,31 @@
 
 1. **Get database from Railway:**
    - [railway.app](https://railway.app) → Provision MySQL
-   - Copy connection URL
-   - Format: `mysql+pymysql://user:pass@host:port/railway`
+   - Go to MySQL service → "Variables" tab
+   - Copy `MYSQL_URL` value
+   - Change `mysql://` to `mysql+pymysql://`
+   
+   **Example:**
+   ```
+   Railway: mysql://root:pass@host:1234/railway
+   Use: mysql+pymysql://root:pass@host:1234/railway
+   ```
 
 2. **Add to Vercel:**
    - Settings → Environment Variables
-   - `DATABASE_URI` = your Railway URL
-   - `SECRET_KEY` = random string
+   - `DATABASE_URI` = your converted Railway URL
+   - `SECRET_KEY` = random string (e.g., `your-secret-key-12345`)
    - `FLASK_ENV` = production
+   - `FLASK_DEBUG` = False
 
 3. **Initialize database locally:**
    ```bash
-   set DATABASE_URI=your-railway-url
+   # Windows
+   set DATABASE_URI=mysql+pymysql://root:pass@host:1234/railway
+   python init_db.py
+   
+   # Mac/Linux
+   export DATABASE_URI=mysql+pymysql://root:pass@host:1234/railway
    python init_db.py
    ```
 

@@ -14,9 +14,9 @@ You MUST have an external database for Vercel. Get one from Railway:
 2. Sign up with GitHub
 3. "New Project" → "Provision MySQL"
 4. Click on MySQL service
-5. Go to "Connect" tab
-6. Copy the "MySQL Connection URL"
-7. Change format from:
+5. Go to "Variables" tab
+6. Find `MYSQL_URL` variable
+7. Copy the value and change format from:
    ```
    mysql://user:pass@host:port/railway
    ```
@@ -24,6 +24,10 @@ You MUST have an external database for Vercel. Get one from Railway:
    ```
    mysql+pymysql://user:pass@host:port/railway
    ```
+
+**Example:**
+- Railway gives: `mysql://root:password@containers-us-west-123.railway.app:1234/railway`
+- You use: `mysql+pymysql://root:password@containers-us-west-123.railway.app:1234/railway`
 
 ### Step 2: Add to Vercel Environment Variables
 
