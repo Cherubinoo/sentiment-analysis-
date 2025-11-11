@@ -2,35 +2,26 @@
 
 Flask web app for collecting and analyzing student feedback on courses.
 
-## 🚀 Deploy to Your Domain
+## 🚀 Quick Deploy
 
-**Your domain:** sentimentanalysis.lovestoblog.com
+**Domain:** sentimentanalysis.lovestoblog.com
 
-### Option 1: PythonAnywhere (Easiest - Free)
+### Recommended: PythonAnywhere (15 minutes)
 1. Sign up at [pythonanywhere.com](https://www.pythonanywhere.com)
-2. Upload code or clone from GitHub
+2. Clone repo and install dependencies
 3. Setup MySQL database
 4. Configure web app
 5. Add custom domain
 
-**Setup time:** 15 minutes  
-📖 **Full guide:** `TRADITIONAL_HOSTING.md`
+📖 **Full guide:** `DEPLOY.md`
 
-### Option 2: Your Existing Hosting
-If lovestoblog.com is on shared hosting (cPanel):
-- Upload files via FTP
-- Create MySQL database
-- Setup subdomain
-- Use `passenger_wsgi.py` and `.htaccess`
+### Alternative: Vercel
+- Requires external database (Railway)
+- See `VERCEL_FIX.md` if getting errors
 
-📖 **Full guide:** `TRADITIONAL_HOSTING.md`
-
-### Option 3: VPS (DigitalOcean/Linode)
-- $5/month
-- Full control
-- Nginx + Gunicorn setup
-
-📖 **Full guide:** `TRADITIONAL_HOSTING.md`
+### Other Options
+- **cPanel hosting:** Use `passenger_wsgi.py` + `.htaccess`
+- **VPS:** Full setup guide in `DEPLOY.md`
 
 ---
 

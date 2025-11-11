@@ -1,14 +1,13 @@
 """
 Vercel serverless function entry point
-This file is required for Vercel to recognize the Flask app
 """
 import sys
 import os
 
-# Add parent directory to path so we can import app
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add parent directory to path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
+# Import the Flask app
 from app import app
-
-# Export the Flask app for Vercel
-# Vercel will handle WSGI automatically
