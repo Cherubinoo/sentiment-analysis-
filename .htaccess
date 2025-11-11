@@ -1,0 +1,8 @@
+# For shared hosting with Passenger
+PassengerEnabled On
+PassengerAppRoot /home/yourusername/sentiment-analysis-
+
+# Rewrite rules
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ passenger_wsgi.py [L]

@@ -2,21 +2,57 @@
 
 Flask web app for collecting and analyzing student feedback on courses.
 
-## 🚀 Quick Deploy with Custom Domain
+## 🚀 Deploy to Your Domain
 
 **Your domain:** sentimentanalysis.lovestoblog.com
 
-### Deploy to Render (Recommended)
-1. Go to [render.com](https://render.com) → Sign up with GitHub
-2. "New +" → "Web Service" → Select this repo
-3. Click "Create Web Service" (auto-detects settings)
-4. Add custom domain: `sentimentanalysis.lovestoblog.com`
-5. Update DNS with CNAME record Render provides
-6. Run `python init_db.py` in Shell tab
+### Option 1: PythonAnywhere (Easiest - Free)
+1. Sign up at [pythonanywhere.com](https://www.pythonanywhere.com)
+2. Upload code or clone from GitHub
+3. Setup MySQL database
+4. Configure web app
+5. Add custom domain
 
-**Done!** Live at https://sentimentanalysis.lovestoblog.com
+**Setup time:** 15 minutes  
+📖 **Full guide:** `TRADITIONAL_HOSTING.md`
 
-📖 **Detailed guide:** See `CUSTOM_DOMAIN_SETUP.md`
+### Option 2: Your Existing Hosting
+If lovestoblog.com is on shared hosting (cPanel):
+- Upload files via FTP
+- Create MySQL database
+- Setup subdomain
+- Use `passenger_wsgi.py` and `.htaccess`
+
+📖 **Full guide:** `TRADITIONAL_HOSTING.md`
+
+### Option 3: VPS (DigitalOcean/Linode)
+- $5/month
+- Full control
+- Nginx + Gunicorn setup
+
+📖 **Full guide:** `TRADITIONAL_HOSTING.md`
+
+---
+
+## 📁 Files Included
+
+- `app.py` - Main Flask application
+- `passenger_wsgi.py` - For shared hosting
+- `.htaccess` - Apache configuration
+- `init_db.py` - Database setup
+- `requirements.txt` - Dependencies
+
+## 🔧 Quick Local Test
+
+```bash
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your database
+python init_db.py
+python app.py
+```
+
+Visit http://localhost:5000
 
 ## 📁 Project Structure
 
