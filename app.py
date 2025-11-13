@@ -35,12 +35,15 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'mysql+pymysql://root:@localhost/sentiment_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Vercel serverless optimizations
+# Vercel serverless optimizations - minimal pooling for serverless
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
-    'pool_recycle': 300,
-    'pool_size': 5,
-    'max_overflow': 10
+    'pool_recycle': 280,
+    'pool_size': 1,
+    'max_overflow': 0,
+    'connect_args': {
+        'connect_timeout': 10
+    }
 }
 
 db = SQLAlchemy(app)
@@ -232,20 +235,28 @@ def staff_login():
 @app.route('/student/register', methods=['GET', 'POST'])
 def student_register():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        full_name = request.form.get('full_name')
-        reg_no = request.form.get('reg_no')
-        role = 'student'
-        if User.query.filter_by(email=email).first():
-            flash('Email already exists.')
+        try:
+            email = request.form.get('email')
+            password = request.form.get('password')
+            full_name = request.form.get('full_name')
+            reg_no = request.form.get('reg_no')
+            role = 'student'
+            
+            if User.query.filter_by(email=email).first():
+                flash('Email already exists.')
+                return redirect(url_for('student_register'))
+            
+            hashed_password = generate_password_hash(password)
+            new_user = User(email=email, password_hash=hashed_password, full_name=full_name, reg_no=reg_no, role=role)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Account created successfully.')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Registration error: {e}")
+            flash(f'Registration failed. Please try again.')
             return redirect(url_for('student_register'))
-        hashed_password = generate_password_hash(password)
-        new_user = User(email=email, password_hash=hashed_password, full_name=full_name, reg_no=reg_no, role=role)
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Account created successfully.')
-        return redirect(url_for('login'))
     return render_template('register.html')
 
 @app.route('/register/staff', methods=['GET', 'POST'])
@@ -352,29 +363,35 @@ def student_review(regulation_id, semester_ids):
                 return redirect(url_for('student_review', regulation_id=regulation_id, semester_ids=semester_ids, step=step+1))
             elif action == 'submit':
                 # Save all to DB
-                for sem_id_str, sem_reviews in reviews_data.items():
-                    sem_id = int(sem_id_str)
-                    for subj_id_str, data in sem_reviews.items():
-                        subj_id = int(subj_id_str)
-                        review = Review(
-                            student_id=current_user.id,
-                            regulation_id=regulation_id,
-                            semester_id=sem_id,
-                            subject_id=subj_id,
-                            feedback=data['comment'] or 'submitted',
-                            teaching=data['teaching'],
-                            course_content=data['course_content'],
-                            examination=data['examination'],
-                            lab_support=data['lab_support'],
-                            teaching_method=data['teaching_method'],
-                            library_support=data['library_support'],
-                            comment=data['comment']
-                        )
-                        db.session.add(review)
-                db.session.commit()
-                session.pop('reviews_data', None)
-                flash('Reviews submitted successfully.')
-                return redirect(url_for('student_dashboard'))
+                try:
+                    for sem_id_str, sem_reviews in reviews_data.items():
+                        sem_id = int(sem_id_str)
+                        for subj_id_str, data in sem_reviews.items():
+                            subj_id = int(subj_id_str)
+                            review = Review(
+                                student_id=current_user.id,
+                                regulation_id=regulation_id,
+                                semester_id=sem_id,
+                                subject_id=subj_id,
+                                feedback=data['comment'] or 'submitted',
+                                teaching=data['teaching'],
+                                course_content=data['course_content'],
+                                examination=data['examination'],
+                                lab_support=data['lab_support'],
+                                teaching_method=data['teaching_method'],
+                                library_support=data['library_support'],
+                                comment=data['comment']
+                            )
+                            db.session.add(review)
+                    db.session.commit()
+                    session.pop('reviews_data', None)
+                    flash('Reviews submitted successfully.')
+                    return redirect(url_for('student_dashboard'))
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Review submission error: {e}")
+                    flash('Failed to submit reviews. Please try again.')
+                    return redirect(url_for('student_review', regulation_id=regulation_id, semester_ids=semester_ids, step=step))
     return render_template('student_review.html', semesters=semesters, current_sem=current_sem, subjects=subjects, step=step, total_steps=len(semesters), semester_ids=semester_ids, regulation_id=regulation_id)
 
 @app.route('/admin/dashboard')
