@@ -254,8 +254,14 @@ def student_register():
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            print(f"Registration error: {e}")
-            flash(f'Registration failed. Please try again.')
+            error_msg = str(e)
+            print(f"Registration error: {error_msg}")
+            print(f"Error type: {type(e).__name__}")
+            # Show more specific error in development
+            if os.getenv('FLASK_ENV') == 'development':
+                flash(f'Registration failed: {error_msg}')
+            else:
+                flash('Registration failed. Please try again or contact support.')
             return redirect(url_for('student_register'))
     return render_template('register.html')
 
@@ -730,6 +736,83 @@ def api_overall_sentiment():
         'sentiment_distribution': sentiment_dist,
         'total_reviews': len(reviews)
     })
+
+# Debug endpoint for Vercel
+@app.route('/api/debug/db-test')
+def debug_db_test():
+    """Test database connection on Vercel"""
+    try:
+        # Test connection
+        result = db.session.execute(db.text('SELECT 1')).fetchone()
+        
+        # Count users
+        user_count = User.query.count()
+        
+        # Get database URI (hide password)
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+        safe_uri = db_uri.split('@')[1] if '@' in db_uri else 'not configured'
+        
+        return jsonify({
+            'status': 'success',
+            'database': 'connected',
+            'test_query': result[0] if result else None,
+            'user_count': user_count,
+            'database_host': safe_uri,
+            'flask_env': os.getenv('FLASK_ENV', 'not set'),
+            'secret_key_set': bool(os.getenv('SECRET_KEY'))
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'database_uri_set': bool(os.getenv('DATABASE_URI')),
+            'flask_env': os.getenv('FLASK_ENV', 'not set')
+        }), 500
+
+# Debug endpoint for registration test
+@app.route('/api/debug/test-register', methods=['POST'])
+def debug_test_register():
+    """Test registration without form"""
+    try:
+        import random
+        test_num = random.randint(1000, 9999)
+        
+        email = f"test{test_num}@example.com"
+        password = "test123"
+        full_name = f"Test User {test_num}"
+        reg_no = f"TEST{test_num}"
+        
+        # Check if exists
+        existing = User.query.filter_by(email=email).first()
+        if existing:
+            return jsonify({'status': 'error', 'message': 'Email exists'}), 400
+        
+        # Create user
+        hashed_password = generate_password_hash(password)
+        new_user = User(
+            email=email,
+            password_hash=hashed_password,
+            full_name=full_name,
+            reg_no=reg_no,
+            role='student'
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'User created',
+            'user_id': new_user.id,
+            'email': email,
+            'reg_no': reg_no
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'error_type': type(e).__name__
+        }), 500
 
 if __name__ == '__main__':
     # Only create tables when running locally, not on production startup
