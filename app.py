@@ -28,7 +28,9 @@ except ImportError as e:
             'overall_satisfaction': 0
         }
 
-load_dotenv()
+# Load .env only in development (not on Vercel)
+if os.getenv('VERCEL') != '1':
+    load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback_secret_key')
