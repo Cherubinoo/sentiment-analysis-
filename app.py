@@ -35,6 +35,12 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'mysql+pymysql://root:@localhost/sentiment_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Session configuration for serverless
+app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
+
 # Vercel serverless optimizations - minimal pooling for serverless
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True,
@@ -240,28 +246,59 @@ def student_register():
             password = request.form.get('password')
             full_name = request.form.get('full_name')
             reg_no = request.form.get('reg_no')
+            
+            print(f"[REGISTER] Attempting registration for: {email}")
+            
+            # Validate inputs
+            if not all([email, password, full_name, reg_no]):
+                flash('All fields are required.')
+                return redirect(url_for('student_register'))
+            
             role = 'student'
             
-            if User.query.filter_by(email=email).first():
+            # Check if user exists
+            print(f"[REGISTER] Checking if user exists...")
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user:
+                print(f"[REGISTER] User already exists: {email}")
                 flash('Email already exists.')
                 return redirect(url_for('student_register'))
             
-            hashed_password = generate_password_hash(password)
-            new_user = User(email=email, password_hash=hashed_password, full_name=full_name, reg_no=reg_no, role=role)
+            print(f"[REGISTER] Hashing password...")
+            hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+            
+            print(f"[REGISTER] Creating user object...")
+            new_user = User(
+                email=email,
+                password_hash=hashed_password,
+                full_name=full_name,
+                reg_no=reg_no,
+                role=role
+            )
+            
+            print(f"[REGISTER] Adding to session...")
             db.session.add(new_user)
+            
+            print(f"[REGISTER] Committing to database...")
             db.session.commit()
+            
+            print(f"[REGISTER] Success! User ID: {new_user.id}")
             flash('Account created successfully.')
             return redirect(url_for('login'))
+            
         except Exception as e:
             db.session.rollback()
             error_msg = str(e)
-            print(f"Registration error: {error_msg}")
-            print(f"Error type: {type(e).__name__}")
-            # Show more specific error in development
-            if os.getenv('FLASK_ENV') == 'development':
-                flash(f'Registration failed: {error_msg}')
-            else:
-                flash('Registration failed. Please try again or contact support.')
+            error_type = type(e).__name__
+            print(f"[REGISTER ERROR] Type: {error_type}")
+            print(f"[REGISTER ERROR] Message: {error_msg}")
+            
+            import traceback
+            print(f"[REGISTER ERROR] Traceback:")
+            traceback.print_exc()
+            
+            # Show error details
+            flash(f'Registration failed: {error_type} - {error_msg}')
             return redirect(url_for('student_register'))
     return render_template('register.html')
 
@@ -737,6 +774,12 @@ def api_overall_sentiment():
         'total_reviews': len(reviews)
     })
 
+# Health check endpoint
+@app.route('/health')
+def health_check():
+    """Simple health check"""
+    return jsonify({'status': 'ok', 'message': 'App is running'})
+
 # Debug endpoint for Vercel
 @app.route('/api/debug/db-test')
 def debug_db_test():
@@ -747,6 +790,7 @@ def debug_db_test():
         
         # Count users
         user_count = User.query.count()
+        review_count = Review.query.count()
         
         # Get database URI (hide password)
         db_uri = app.config['SQLALCHEMY_DATABASE_URI']
@@ -757,14 +801,19 @@ def debug_db_test():
             'database': 'connected',
             'test_query': result[0] if result else None,
             'user_count': user_count,
+            'review_count': review_count,
             'database_host': safe_uri,
             'flask_env': os.getenv('FLASK_ENV', 'not set'),
-            'secret_key_set': bool(os.getenv('SECRET_KEY'))
+            'secret_key_set': bool(os.getenv('SECRET_KEY')),
+            'database_uri_set': bool(os.getenv('DATABASE_URI'))
         })
     except Exception as e:
+        import traceback
         return jsonify({
             'status': 'error',
             'error': str(e),
+            'error_type': type(e).__name__,
+            'traceback': traceback.format_exc(),
             'database_uri_set': bool(os.getenv('DATABASE_URI')),
             'flask_env': os.getenv('FLASK_ENV', 'not set')
         }), 500
